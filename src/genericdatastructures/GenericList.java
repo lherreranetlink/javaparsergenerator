@@ -3,6 +3,7 @@
 package genericdatastructures;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
@@ -26,6 +27,10 @@ public class GenericList {
     
     public int size(){
         return list.size();
+    }
+    
+    public Iterator getIterator(){
+        return list.iterator();
     }
     
 }

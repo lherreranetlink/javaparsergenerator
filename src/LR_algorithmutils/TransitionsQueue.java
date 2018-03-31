@@ -3,7 +3,6 @@
 package LR_algorithmutils;
 
 import genericdatastructures.GenericList;
-import grammar.Production;
 
 /**
  *
@@ -17,8 +16,8 @@ public class TransitionsQueue extends GenericList{
         super.add(node);
     }
     
-    public void queue(Production prod, int state, int pointerPos){
-        TransitionsQueueNode newNode = new TransitionsQueueNode(prod, state, pointerPos);
+    public void queue(ProductionAtTime prod, int state){
+        TransitionsQueueNode newNode = new TransitionsQueueNode(prod, state);
         super.add(newNode);
     }
     

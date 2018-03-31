@@ -25,10 +25,6 @@ public class MadeTransitionsList extends GenericList {
         return null;
     }
     
-    public Iterator getIterator(){
-        return this.list.iterator();
-    }
-    
     public void print() {
         this.list.forEach((node) -> {
             MadeTransitionNode aux = (MadeTransitionNode) node;

@@ -11,10 +11,10 @@ import java.util.ArrayList;
  */
 public class Production {
 
-    private int index;
-    private String symbol;
+    protected int index;
+    protected String symbol;
 
-    private final ArrayList<ProductionComponent> components;
+    protected final ArrayList<ProductionComponent> components;
 
     public Production() {
         components = new ArrayList<>();

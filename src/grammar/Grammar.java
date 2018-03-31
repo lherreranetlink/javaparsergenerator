@@ -3,6 +3,7 @@
 package grammar;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
@@ -10,35 +11,39 @@ import java.util.ArrayList;
  */
 public class Grammar {
 
-    public ArrayList<Production> rules;
+    protected ArrayList<Production> productions;
 
     public Grammar() {
-        rules = new ArrayList<>();
+        productions = new ArrayList<>();
     }
 
     public void addProduction(Production prod) {
-        rules.add(prod);
+        productions.add(prod);
     }
 
     public void addProduction(int index, Production prod) {
-        rules.add(index, prod);
+        productions.add(index, prod);
     }
 
     public Production getProduction(int index) {
-        return rules.get(index);
+        return productions.get(index);
     }
 
     public Production getInitialProduction() {
-        return rules.get(0);
+        return productions.get(0);
     }
 
     public int getGrammarSize() {
-        return rules.size();
+        return productions.size();
+    }
+    
+    public Iterator getProductionsIterator(){
+        return this.productions.iterator();
     }
 
     public void print() {
-        this.rules.forEach((production) -> {
-            System.out.println("Rule: " + production.getSymbol() + " index: " + production.getIndex());
+        this.productions.forEach((production) -> {
+            System.out.println("Production: " + production.getSymbol() + " index: " + production.getIndex());
             production.printComponents();
             System.out.print("\n");
         });
