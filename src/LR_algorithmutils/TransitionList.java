@@ -9,15 +9,15 @@ import java.util.Iterator;
  *
  * @author leonardoho
  */
-public class MadeTransitionsList extends GenericList {
+public class TransitionList extends GenericList {
 
-    public MadeTransitionsList() {
+    public TransitionList() {
     }
 
-    public MadeTransitionNode getNodeBySymbol(String symbol) {
+    public TransitionNode getNodeBySymbol(String symbol) {
         Iterator iterator = list.iterator();
         while (iterator.hasNext()) {
-            MadeTransitionNode node = (MadeTransitionNode) iterator.next();
+            TransitionNode node = (TransitionNode) iterator.next();
             if (node.getSymbol().equals(symbol)) {
                 return node;
             }
@@ -25,11 +25,20 @@ public class MadeTransitionsList extends GenericList {
         return null;
     }
     
+    public void remove(int index){
+        list.remove(index);
+    }
+    
+    public void remove(TransitionNode node){
+        list.remove(node);
+    }
+    
     public void print() {
         this.list.forEach((node) -> {
-            MadeTransitionNode aux = (MadeTransitionNode) node;
+            TransitionNode aux = (TransitionNode) node;
             System.out.println("Symbol: " + aux.getSymbol());
-            System.out.println("State: " + aux.getState());
+            aux.printPreviousStates();
+            System.out.println("Got To: " + aux.getGoTo());
             aux.printProductionPositions();
             System.out.print("\n");
         });

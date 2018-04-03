@@ -10,22 +10,24 @@ import grammar.Production;
  */
 public class TransitionsQueueNode {
 
-    private ProductionAtTime production;
+    private Production production;
     private int state;
+    private int pointerPosition;
 
     public TransitionsQueueNode() {
     }
 
-    public TransitionsQueueNode(ProductionAtTime prod, int state) {
+    public TransitionsQueueNode(Production prod, int state, int pointerPosition) {
         this.production = prod;
         this.state = state;
+        this.pointerPosition = pointerPosition;
     }
 
-    public void setProduction(ProductionAtTime prod) {
+    public void setProduction(Production prod) {
         this.production = prod;
     }
 
-    public ProductionAtTime getProduction() {
+    public Production getProduction() {
         return this.production;
     }
 
@@ -33,8 +35,16 @@ public class TransitionsQueueNode {
         this.state = state;
     }
 
-    public int getstate() {
+    public int getState() {
         return this.state;
+    }
+    
+    public void setPointerPosition(int pointerPosition){
+        this.pointerPosition = pointerPosition;
+    }
+    
+    public int getPointerPosition(){
+        return this.pointerPosition;
     }
     
 }

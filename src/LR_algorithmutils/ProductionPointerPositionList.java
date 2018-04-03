@@ -12,15 +12,15 @@ import java.util.Iterator;
  *
  * @author leonardoho
  */
-public class ProductionAtTimeList extends GenericList{
+public class ProductionPointerPositionList extends GenericList{
     
-    public ProductionAtTimeList(){}
+    public ProductionPointerPositionList(){}
     
     public void print(){
         Iterator iterator = this.getIterator();
         while(iterator.hasNext()){
-            ProductionAtTimeNode node = (ProductionAtTimeNode) iterator.next();
-            System.out.println("Production: " + node.getProduction().getIndex());
+            ProductionPointerPositionNode node = (ProductionPointerPositionNode) iterator.next();
+            System.out.println("Production: " + node.getProductionIndex());
             System.out.println("Pointer position: " + node.getPointerPosition());
         }
     }

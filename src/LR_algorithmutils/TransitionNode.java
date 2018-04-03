@@ -2,29 +2,31 @@
  */
 package LR_algorithmutils;
 
-import grammar.Production;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
  *
  * @author leonardoho
  */
-public class MadeTransitionNode {
+public class TransitionNode {
 
-    private int state;
-    private final ProductionAtTimeList productionsAtTime;
+    private final ArrayList<Integer> previousStateList;
+    private int goTo;
+    private final ProductionPointerPositionList productionsPointerPosition;
     private String symbol;
 
-    public MadeTransitionNode() {
-        productionsAtTime = new ProductionAtTimeList();
+    public TransitionNode() {
+        productionsPointerPosition = new ProductionPointerPositionList();
+        previousStateList = new ArrayList<>();
     }
 
-    public void setState(int state) {
-        this.state = state;
+    public void setGoTo(int goTo) {
+        this.goTo = goTo;
     }
 
-    public int getState() {
-        return this.state;
+    public int getGoTo() {
+        return this.goTo;
     }
 
     public void setSymbol(String symbol) {
@@ -35,40 +37,47 @@ public class MadeTransitionNode {
         return this.symbol;
     }
 
-    /*public void appendProduction(ProductionAtTimeNode node) {
-        productionsAtTime.add(node);
-    }*/
-
-    public void appendProduction(Production production, int pointerPos) {
-        /*ProductionAtTimeNode node = new ProductionAtTimeNode(production, pointerPos);
-        productionsAtTime.add(node);*/
+    public void appendPreviousState(int previousState) {
+        this.previousStateList.add(previousState);
     }
 
-    public Iterator getProductionsAtTimeIterator() {
-        return this.productionsAtTime.getIterator();
+    public void appendProductionPointerPosition(int productionIndex, int pointerPosition) {
+        ProductionPointerPositionNode node = new ProductionPointerPositionNode(productionIndex,
+                pointerPosition);
+        productionsPointerPosition.add(node);
     }
 
-    public boolean isIdentical(MadeTransitionNode node) {
-        /*if (this.symbol.equals(node.getSymbol())) {
-            if (this.productionsAtTime.size() == node.productionsAtTime.size()) {
-                Iterator iteratorThis = this.getProductionsAtTimeIterator();
-                Iterator iteratorAux = node.getProductionsAtTimeIterator();
+    public Iterator getProductionListIterator() {
+        return this.productionsPointerPosition.getIterator();
+    }
+
+    public boolean haveSameData(TransitionNode node) {
+        if (this.symbol.equals(node.symbol)) {
+            if (this.productionsPointerPosition.size() == node.productionsPointerPosition.size()) {
+                Iterator iteratorThis = this.getProductionListIterator();
+                Iterator iteratorAux = node.getProductionListIterator();
                 while (iteratorThis.hasNext()) {
-                    ProductionAtTimeNode thisProductionAtTime = (ProductionAtTimeNode) iteratorThis.next();
-                    ProductionAtTimeNode auxProductionAtTime = (ProductionAtTimeNode) iteratorAux.next();
-                    if (thisProductionAtTime.getProduction() != auxProductionAtTime.getProduction()
-                            || thisProductionAtTime.getPointerPosition() != auxProductionAtTime.getPointerPosition()) {
+                    ProductionPointerPositionNode current = (ProductionPointerPositionNode) iteratorThis.next();
+                    ProductionPointerPositionNode compare = (ProductionPointerPositionNode) iteratorAux.next();
+                    if (current.getProductionIndex() != compare.getProductionIndex()
+                            || current.getPointerPosition() != compare.getPointerPosition()) {
                         return false;
                     }
                 }
                 return true;
             }
-        }*/
+        }
         return false;
     }
 
+    public void printPreviousStates() {
+        this.previousStateList.forEach((state) -> {
+            System.out.println("Prev state: " + state);
+        });
+    }
+
     public void printProductionPositions() {
-        productionsAtTime.print();
+        productionsPointerPosition.print();
     }
 
 }

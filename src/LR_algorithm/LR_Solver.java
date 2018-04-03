@@ -2,10 +2,11 @@
  */
 package LR_algorithm;
 
-import LR_algorithmutils.MadeTransitionNode;
-import LR_algorithmutils.MadeTransitionsList;
-import LR_algorithmutils.ProductionAtTime;
-import LR_algorithmutils.StatesImageList;
+import LR_algorithmutils.ProductionPointerPositionNode;
+import LR_algorithmutils.ReductionStateNode;
+import LR_algorithmutils.TransitionNode;
+import LR_algorithmutils.TransitionList;
+import LR_algorithmutils.ReductionStatesList;
 import LR_algorithmutils.TransitionsQueue;
 import LR_algorithmutils.TransitionsQueueNode;
 import grammar.Grammar;
@@ -21,26 +22,30 @@ import java.util.Iterator;
  */
 public class LR_Solver {
 
+    public static final int INITIAL_STATE = 0;
     private final Grammar grammar;
-    private final StatesImageList statesImageList;
-    private final MadeTransitionsList madeTransitionsList;
+    private final TransitionList madeTransitionsList;
     private final TransitionsQueue transitionsQueue;
-            
+    private final ReductionStatesList reductionStates;
+
+    int currentState;
     int statesCounter;
 
     public LR_Solver() {
         grammar = new Grammar();
-        statesImageList = new StatesImageList();
-        madeTransitionsList = new MadeTransitionsList();
+        madeTransitionsList = new TransitionList();
         transitionsQueue = new TransitionsQueue();
+        reductionStates = new ReductionStatesList();
+        currentState = 0;
         statesCounter = 0;
     }
 
     public LR_Solver(Grammar grammar) {
         this.grammar = grammar;
-        statesImageList = new StatesImageList();
-        madeTransitionsList = new MadeTransitionsList();
+        madeTransitionsList = new TransitionList();
         transitionsQueue = new TransitionsQueue();
+        reductionStates = new ReductionStatesList();
+        currentState = 0;
         statesCounter = 0;
     }
 
@@ -52,22 +57,43 @@ public class LR_Solver {
         while (transitionsQueue.size() > 0) {
 
             TransitionsQueueNode currTransition = transitionsQueue.dequeue();
-            ProductionAtTime currProduction = currTransition.getProduction();
-
-            int pointerPosition = currProduction.getPointerPosition();
+            this.currentState = currTransition.getState();
+            Production currProduction = currTransition.getProduction();
+            currProduction.setPointerPosition(currTransition.getPointerPosition());
             ProductionComponent pointedComponent = currProduction.getPointedComponent();
+            TransitionList auxTransitionsList;
 
-            switch (pointedComponent.getType()) {
-                case ProductionComponent.NO_TERMINAL:
-                    Grammar auxGrammar = new Grammar();
-                    auxGrammar.addProduction(currProduction);
-                    this.fillAuxiliarGrammarByDepthTravel(auxGrammar, (NoTerminal) pointedComponent);
-                    MadeTransitionsList auxTransitionsList =  this.createAuxiliarTransitionsList(auxGrammar);
-                    this.mergeAuxiliarAndFinalTransitionsLists(auxTransitionsList);
-                    break;
-                /*case ProductionComponent.TERMINAL:
-                    break;
-                case ProductionComponent.EPSILON:*/
+            if (pointedComponent != null && pointedComponent.getType() != ProductionComponent.EPSILON) {
+                switch (pointedComponent.getType()) {
+                    case ProductionComponent.NO_TERMINAL:
+                        Grammar auxGrammar = new Grammar();
+                        auxGrammar.addProduction(currProduction);
+                        this.fillAuxiliarGrammarByDepthTravel(auxGrammar, (NoTerminal) pointedComponent);
+                        auxGrammar.print();
+                        auxTransitionsList = this.createAuxiliarTransitionsList(auxGrammar);
+                        this.mergeAuxiliarAndFinalTransitionsLists(auxTransitionsList);
+                        this.madeTransitionsList.print();
+                        this.createNewStates(auxTransitionsList);
+                        transitionsQueue.print();
+                        break;
+                    case ProductionComponent.TERMINAL:
+                        auxTransitionsList = new TransitionList();
+                        TransitionNode node = new TransitionNode();
+                        
+                        node.setSymbol(pointedComponent.getSymbol());
+                        node.appendPreviousState(this.currentState);
+                        node.appendProductionPointerPosition(currProduction.getIndex(), currProduction.getPointerPosition());
+                        
+                        this.mergeAuxiliarAndFinalTransitionsLists(auxTransitionsList);
+                        this.madeTransitionsList.print();
+                        this.createNewStates(auxTransitionsList);
+                        transitionsQueue.print();
+                        break;
+                }
+            } else {
+                ReductionStateNode reductionNode = new ReductionStateNode(currProduction, this.currentState);
+                reductionStates.add(reductionNode);
+                reductionStates.print();
             }
         }
     }
@@ -80,12 +106,12 @@ public class LR_Solver {
         String componentSymbol = initialProduction.getComponent(0).getSymbol();
         NoTerminal noTerm = new NoTerminal(componentSymbol);
         prod.addComponent(noTerm);
-        
+
         Iterator productionsIterator = grammar.getProductionsIterator();
-        
-        while (productionsIterator.hasNext()){
+
+        while (productionsIterator.hasNext()) {
             Production production = (Production) productionsIterator.next();
-            if (noTerm.getSymbol().equals(production.getSymbol())){
+            if (noTerm.getSymbol().equals(production.getSymbol())) {
                 noTerm.appendProductionToPoint(production);
             }
         }
@@ -93,9 +119,9 @@ public class LR_Solver {
 
     private void initializeTransitionsQueue() {
         /*Put first production in the transitions Queue*/
-        ProductionAtTime initialProduction = (ProductionAtTime) grammar.getInitialProduction();
-        initialProduction.setPointerPosition(ProductionAtTime.INITIAL_POINTER_POSITION);
-        TransitionsQueueNode node = new TransitionsQueueNode(initialProduction, 0);
+        Production initialProduction = (Production) grammar.getInitialProduction();
+        TransitionsQueueNode node = new TransitionsQueueNode(initialProduction, INITIAL_STATE,
+                Production.INITIAL_POINTER_POSITION);
         transitionsQueue.queue(node);
     }
 
@@ -109,76 +135,87 @@ public class LR_Solver {
         /*Do a depth travel thruogh the grammar graph to obtain Epsilon Lock*/
 
         int productionsCount = 0;
-        ProductionAtTime nextProduction;
-        while ((nextProduction = (ProductionAtTime) component.getProductionToPoint(productionsCount++)) != null) {
-            
+        Production nextProduction;
+        while ((nextProduction = component.getProductionToPoint(productionsCount++)) != null) {
             if (!visitedProductions.contains(nextProduction)) {
+                nextProduction.setPointerPosition(Production.INITIAL_POINTER_POSITION);
                 visitedProductions.add(nextProduction);
                 grammar.addProduction(nextProduction);
-                
+
                 ProductionComponent firstComponent = nextProduction.getFirstComponent();
-                
+
                 if (firstComponent.getType() == ProductionComponent.NO_TERMINAL) {
                     this.doDepthTravel(grammar, (NoTerminal) firstComponent, visitedProductions);
                 }
             }
-            
+
         }
     }
-    
-    private MadeTransitionsList createAuxiliarTransitionsList(Grammar auxGrammar){
-        
-        MadeTransitionsList auxList = new MadeTransitionsList();
-        
+
+    private TransitionList createAuxiliarTransitionsList(Grammar auxGrammar) {
+
+        TransitionList auxList = new TransitionList();
+
         Iterator productionsIterator = auxGrammar.getProductionsIterator();
-        while (productionsIterator.hasNext()){
-            
-            ProductionAtTime currProduction = (ProductionAtTime) productionsIterator.next();
+        while (productionsIterator.hasNext()) {
+
+            Production currProduction = (Production) productionsIterator.next();
             ProductionComponent pointedComponent = currProduction.getPointedComponent();
-            
-            MadeTransitionNode node;
-            if ((node = auxList.getNodeBySymbol(pointedComponent.getSymbol())) == null){
-                node = new MadeTransitionNode();
+
+            TransitionNode node;
+            if ((node = auxList.getNodeBySymbol(pointedComponent.getSymbol())) == null) {
+                node = new TransitionNode();
                 node.setSymbol(pointedComponent.getSymbol());
-                node.setState(this.statesCounter);
+                node.appendPreviousState(this.currentState);
                 auxList.add(node);
             }
-            node.appendProduction(currProduction, 0);
+            node.appendProductionPointerPosition(currProduction.getIndex(), currProduction.getPointerPosition());
         }
-        
+
         return auxList;
     }
-    
-    private void mergeAuxiliarAndFinalTransitionsLists(MadeTransitionsList auxList){
-        
-        /*if (this.madeTransitionsList.size() == 0){
-            Iterator iterator = auxList.getIterator();
-            while (iterator.hasNext()){
-                MadeTransitionNode transition = (MadeTransitionNode) iterator.next();
-                transition.setState(++statesCounter);
-                this.madeTransitionsList.add(transition);
-            }
-        } else{
-            boolean identicalTransition = false;
-            Iterator auxListIterator = auxList.getIterator();
-            while(auxListIterator.hasNext()){
-                MadeTransitionNode auxListNode = (MadeTransitionNode) auxListIterator.next();
-                
-                Iterator transitionListIterator = this.madeTransitionsList.getIterator();
-                while (transitionListIterator.hasNext()){
-                    MadeTransitionNode transitionsListNode = (MadeTransitionNode) transitionListIterator.next();
-                    
-                    if (transitionsListNode.isIdentical(auxListNode)){
-                        identicalTransition = true;
-                        break;
-                    } else {
-                        
-                    }
-                }
-                if (identicalTransition){
-                    
+
+    private void mergeAuxiliarAndFinalTransitionsLists(TransitionList auxList) {
+
+        boolean identicalTransition = false;
+
+        Iterator auxListIterator = auxList.getIterator();
+        while (auxListIterator.hasNext()) {
+            TransitionNode auxListNode = (TransitionNode) auxListIterator.next();
+
+            Iterator transitionListIterator = this.madeTransitionsList.getIterator();
+            while (transitionListIterator.hasNext()) {
+                TransitionNode transitionsListNode = (TransitionNode) transitionListIterator.next();
+
+                if (transitionsListNode.haveSameData(auxListNode)) {
+                    transitionsListNode.appendPreviousState(currentState);
+                    auxList.remove(auxListNode);
+                    identicalTransition = true;
+                    break;
                 }
             }
-        }*/
+            if (!identicalTransition) {
+                auxListNode.setGoTo(++this.statesCounter);
+                this.madeTransitionsList.add(auxListNode);
+            }
+        }
     }
+
+    private void createNewStates(TransitionList auxTransitionsList) {
+
+        Iterator auxListIterator = auxTransitionsList.getIterator();
+        while (auxListIterator.hasNext()) {
+            TransitionNode currentTransition = (TransitionNode) auxListIterator.next();
+
+            Iterator productionsIterator = currentTransition.getProductionListIterator();
+            while (productionsIterator.hasNext()) {
+                ProductionPointerPositionNode prod = (ProductionPointerPositionNode) productionsIterator.next();
+                Production productionTransition = this.grammar.getProduction(prod.getProductionIndex());
+                TransitionsQueueNode newTransition = new TransitionsQueueNode(productionTransition,
+                        currentTransition.getGoTo(), prod.getPointerPosition() + 1);
+                transitionsQueue.add(newTransition);
+            }
+        }
+    }
+
 }
