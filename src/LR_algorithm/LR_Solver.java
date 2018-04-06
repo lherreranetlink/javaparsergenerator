@@ -67,7 +67,7 @@ public class LR_Solver {
                 switch (pointedComponent.getType()) {
                     case ProductionComponent.NO_TERMINAL:
                         Grammar auxGrammar = new Grammar();
-                        auxGrammar.addProduction(currProduction);
+                        auxGrammar.addProduction(currProduction.getCopy());
                         this.fillAuxiliarGrammarByDepthTravel(auxGrammar, (NoTerminal) pointedComponent);
                         auxGrammar.print();
                         auxTransitionsList = this.createAuxiliarTransitionsList(auxGrammar);
@@ -83,12 +83,12 @@ public class LR_Solver {
                         node.setSymbol(pointedComponent.getSymbol());
                         node.appendPreviousState(this.currentState);
                         node.appendProductionPointerPosition(currProduction.getIndex(), currProduction.getPointerPosition());
+                        auxTransitionsList.add(node);
                         
                         this.mergeAuxiliarAndFinalTransitionsLists(auxTransitionsList);
                         this.madeTransitionsList.print();
                         this.createNewStates(auxTransitionsList);
                         transitionsQueue.print();
-                        break;
                 }
             } else {
                 ReductionStateNode reductionNode = new ReductionStateNode(currProduction, this.currentState);
@@ -103,7 +103,7 @@ public class LR_Solver {
         Production initialProduction = grammar.getInitialProduction();
         Production prod = new Production("Initial", 0);
         grammar.addProduction(0, prod);
-        String componentSymbol = initialProduction.getComponent(0).getSymbol();
+        String componentSymbol = initialProduction.getSymbol();
         NoTerminal noTerm = new NoTerminal(componentSymbol);
         prod.addComponent(noTerm);
 
@@ -140,7 +140,7 @@ public class LR_Solver {
             if (!visitedProductions.contains(nextProduction)) {
                 nextProduction.setPointerPosition(Production.INITIAL_POINTER_POSITION);
                 visitedProductions.add(nextProduction);
-                grammar.addProduction(nextProduction);
+                grammar.addProduction(nextProduction.getCopy());
 
                 ProductionComponent firstComponent = nextProduction.getFirstComponent();
 
@@ -189,7 +189,7 @@ public class LR_Solver {
 
                 if (transitionsListNode.haveSameData(auxListNode)) {
                     transitionsListNode.appendPreviousState(currentState);
-                    auxList.remove(auxListNode);
+                    auxListIterator.remove(/*auxListNode*/);
                     identicalTransition = true;
                     break;
                 }

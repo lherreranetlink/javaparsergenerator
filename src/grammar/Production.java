@@ -16,7 +16,7 @@ public class Production {
     protected String symbol;
     protected int pointerPosition;
 
-    protected final ArrayList<ProductionComponent> components;
+    protected ArrayList<ProductionComponent> components;
 
     public Production() {
         components = new ArrayList<>();
@@ -95,6 +95,25 @@ public class Production {
 
     public ProductionComponent getComponent(int index) {
         return this.components.get(index);
+    }
+    
+    public void setComponents(ArrayList<ProductionComponent> components){
+        this.components = components;
+    }
+    
+    public ArrayList getComponents(){
+        return this.components;
+    }
+    
+    public Production getCopy(){
+        Production newProduction = new Production();
+        
+        newProduction.setIndex(this.getIndex());
+        newProduction.setPointerPosition(this.getPointerPosition());
+        newProduction.setComponents(this.getComponents());
+        newProduction.setSymbol(this.getSymbol());
+        
+        return newProduction;
     }
 
     public void printComponents() {

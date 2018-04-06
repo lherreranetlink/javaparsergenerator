@@ -19,7 +19,7 @@ public class ParserGenerator {
      */
     public static void main(String[] args) {
         try {
-            GrammarBuilder builder = new GrammarBuilder("example");
+            GrammarBuilder builder = new GrammarBuilder("example2");
             Grammar grammar = builder.buildGrammar();
             LR_Solver lr_solver = new LR_Solver (grammar);
             lr_solver.do_LR1_Algorithm();
