@@ -69,12 +69,9 @@ public class LR_Solver {
                         Grammar auxGrammar = new Grammar();
                         auxGrammar.addProduction(currProduction.getCopy());
                         this.fillAuxiliarGrammarByDepthTravel(auxGrammar, (NoTerminal) pointedComponent);
-                        auxGrammar.print();
                         auxTransitionsList = this.createAuxiliarTransitionsList(auxGrammar);
                         this.mergeAuxiliarAndFinalTransitionsLists(auxTransitionsList);
-                        this.madeTransitionsList.print();
                         this.createNewStates(auxTransitionsList);
-                        transitionsQueue.print();
                         break;
                     case ProductionComponent.TERMINAL:
                         auxTransitionsList = new TransitionList();
@@ -86,14 +83,11 @@ public class LR_Solver {
                         auxTransitionsList.add(node);
                         
                         this.mergeAuxiliarAndFinalTransitionsLists(auxTransitionsList);
-                        this.madeTransitionsList.print();
                         this.createNewStates(auxTransitionsList);
-                        transitionsQueue.print();
                 }
             } else {
                 ReductionStateNode reductionNode = new ReductionStateNode(currProduction, this.currentState);
                 reductionStates.add(reductionNode);
-                reductionStates.print();
             }
         }
     }

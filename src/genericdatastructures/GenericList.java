@@ -21,6 +21,10 @@ public class GenericList {
         return list.get(index);
     }
     
+    public Object contains(Object obj) {
+        return this.list.contains(obj);
+    }
+    
     public void add(Object obj){
         list.add(obj);
     }
